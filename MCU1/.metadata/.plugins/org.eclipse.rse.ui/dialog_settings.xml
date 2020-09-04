@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="RemoteSearchPage">
+		<item key="caseSensitive" value="false"/>
+		<item key="stringRegex" value="false"/>
+		<item key="fileNameCaseSensitive" value="true"/>
+		<item key="fileNameRegex" value="false"/>
+		<item key="includeArchives" value="false"/>
+		<item key="includeSubfolders" value="false"/>
+		<item key="dataSize" value="1"/>
+	</section>
+	<section name="RemoteSearchPage.data0">
+		<item key="searchString" value="512 KBytes"/>
+		<item key="caseSensitive" value="false"/>
+		<item key="stringRegex" value="false"/>
+		<item key="fileNames" value="*"/>
+		<item key="fileNameCaseSensitive" value="true"/>
+		<item key="fileNameRegex" value="false"/>
+		<item key="profileName" value="DESKTOP-C709FMQ"/>
+		<item key="connectionName" value="Local"/>
+		<item key="folderName" value="D:\Summer 2020\Embedded Software\Wrokspace"/>
+		<item key="includeArchives" value="false"/>
+		<item key="includeSubfolders" value="false"/>
+	</section>
+</section>
