@@ -1,0 +1,112 @@
+/*
+ * 006spi_tx_testing.c
+ *
+ *  Created on: Jul 28, 2020
+ *      Author: amira
+ */
+
+#include "stm32f446xx.h"
+#include<string.h>
+
+/*
+ * PB14- SPI2_MISO
+ * PB15- SPI2_MOSI
+ * PB13- SPI2_SCLK
+ * PB12- SPI2_NSS
+ * ALT function mode : 5
+ * GPIO Port B
+ */
+
+void SPI2_GPIOInits(void)
+{
+	GPIO_Handle_t SPIPins;
+
+	SPIPins.pGPIOx = GPIOB;
+	SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+	SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
+	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+	SPIPins.GPIO_PinConfig. GPIO_PinSpeed = GPIO_SPEED_FAST;
+
+
+	//MOSI
+	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_15;
+	GPIO_Init(&SPIPins); //Pass pointer address of the handle
+
+	//SCLK
+	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
+	GPIO_Init(&SPIPins);
+
+/*
+* Note: For this application we don't want to use MISO and NSS because there is no slave.
+* 		 So, don't configure those pins and they are free for other users.
+*/
+
+//	//MISO
+//	SPIPins.GPIO_PinConfig.GPIO_PinNUmber = GPIO_PIN_NO_14;
+//	GPIO_Init(&SPIPins);
+
+//	//NSS
+//	SPIPins.GPIO_PinConfig.GPIO_PinNUmber = GPIO_PIN_NO_12;
+//	GPIO_Init(&SPIPins);
+
+}
+
+void SPI2_Inits(void)
+{
+	SPI_Handle_t SPI2handle;
+
+	SPI2handle.pSPIx = SPI2;
+	SPI2handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
+	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
+	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2; //Generates SCLK of 8MHz
+	SPI2handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
+	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
+	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_EN; //Software Slave management Enable for NSS Pin, bcoz we dont have any slave
+
+	SPI_Init(&SPI2handle); //Call SPI init and we have to pass the address of handle
+}
+
+int main(void)
+{
+	char user_data[] = "Hello world";
+
+	//This function is used to initialize the GPIO pins to behave as SPI2 pins
+	SPI2_GPIOInits();
+
+	//This function is used to initialize the SPI2 peripheral parameters
+	SPI2_Inits();
+
+	//This makes NSS signal internally high and avoids MODF error
+	SPI_SSIConfig(SPI2,ENABLE);
+
+	//enable the SPI2 peripheral
+	SPI_PeripheralControl(SPI2,ENABLE);
+
+	SPI_SendData(SPI2,(uint8_t*)user_data, strlen(user_data));
+
+	//lets confirm SPI is not busy, 0 is not busy and 1 is busy
+	//while(SPI_GetFlagStatus(SPI2,SPI_BSY_FLAG));
+
+	//disable the SPI2 peripheral
+	//SPI_PeripheralControl(SPI2,DISABLE);
+
+	while(1); //Infinite while loop to hang the application
+
+
+	return 0;
+}
+
+
+
+/* Note: Remember Here we used NSS enable(software slave management is enabled). For master the NSS signal should
+ * be tied to +Vcc when not used to avoid MODF error which happens in multi master situation.
+ * So, let's make SSI = 1 to tie NSS to +Vcc internally
+ *
+ * Remember: SSI bit influence NSS state when SSM =1
+ *
+ * By default SSI = 0, So NSS will be pulled low which is not acceptable for master when working in non multi master situation
+ *
+ */
+
